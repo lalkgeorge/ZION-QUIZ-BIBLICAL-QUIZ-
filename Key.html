@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<base target="_top">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,800&family=Newsreader:ital,opsz,wght@0,6..72,500;0,6..72,700;1,6..72,500&display=swap" rel="stylesheet">
+<style>
+/* ============================================================
+   ZION QUIZ — the answer key
+   Host only. Same leather and gilt as the control page, and it
+   prints clean on white paper for the lectern.
+   ============================================================ */
+:root{
+  --leather:#3A0D16;
+  --leather-hi:#5C1A28;
+  --leather-lo:#22060D;
+  --gilt:#E0B04A;
+  --gilt-lo:#A98232;
+  --page:#F4EEE2;
+  --page-2:#E7DFCF;
+  --ink:#23191A;
+  --ink-soft:#5E5250;
+  --hl:#F9E547;
+  --hl-green:#8BE3A0;
+  --fade:#B7AA9E;
+  --display:"Bricolage Grotesque","Arial Narrow",system-ui,sans-serif;
+  --text:"Newsreader",Georgia,"Times New Roman",serif;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+[hidden]{display:none!important}
+html,body{min-height:100%}
+body{
+  font-family:var(--display);color:var(--page);
+  background:radial-gradient(120% 80% at 50% -10%, var(--leather-hi) 0%, var(--leather) 50%, var(--leather-lo) 100%) fixed;
+  -webkit-font-smoothing:antialiased;
+}
+body::before{
+  content:"";position:fixed;inset:0;pointer-events:none;opacity:.22;mix-blend-mode:overlay;
+  background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 0 .55 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+}
+button{font:inherit;color:inherit;background:none;border:none;cursor:pointer}
+:focus-visible{outline:3px solid var(--hl);outline-offset:3px}
+
+/* ---------- brand: a ribbon bookmark hanging from the top edge ---------- */
+.brand{display:flex;align-items:flex-start;gap:12px}
+.ribbon{
+  width:18px;height:40px;margin-top:-22px;flex-shrink:0;
+  background:linear-gradient(90deg,var(--gilt-lo),var(--gilt) 45%,var(--gilt-lo));
+  clip-path:polygon(0 0,100% 0,100% 100%,50% 78%,0 100%);
+}
+.brand-name{font-weight:800;font-size:21px;letter-spacing:-.01em;line-height:1}
+
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:10px;font-weight:800;font-size:18px;padding:17px 26px;border-radius:14px;transition:transform .08s ease,filter .15s ease}
+.btn:not(:disabled):active{transform:scale(.97)}
+.btn-line{border:2px solid rgba(224,176,74,.55);color:var(--page)}
+.btn-line:hover{border-color:var(--gilt)}
+.btn-sm{font-size:14px;padding:10px 16px;border-radius:10px}
+
+/* ============================================================
+   ANSWER KEY
+   ============================================================ */
+.k-shell{max-width:1000px;margin:0 auto;padding:28px 28px 60px}
+.k-head{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:16px;padding-bottom:20px;border-bottom:1px solid rgba(224,176,74,.3)}
+.k-sub{font-family:var(--text);font-style:italic;font-size:18px;color:var(--gilt);margin-left:4px;align-self:center}
+.k-note{font-family:var(--text);font-size:17px;color:var(--page-2);margin:22px 0 4px;line-height:1.5;max-width:60ch}
+.k-list{display:grid;gap:16px;margin-top:22px}
+.k-card{background:var(--page);color:var(--ink);border-radius:8px 16px 16px 8px;padding:20px 24px;box-shadow:6px 0 0 -2px var(--gilt),0 14px 30px rgba(0,0,0,.26)}
+.k-card.asked{box-shadow:6px 0 0 -2px var(--ink-soft),0 14px 30px rgba(0,0,0,.26)}
+.k-card.live{box-shadow:6px 0 0 -2px var(--hl),0 0 0 3px var(--hl),0 14px 30px rgba(0,0,0,.3)}
+.k-top{display:flex;align-items:baseline;gap:14px;margin-bottom:12px}
+.k-n{font-weight:800;font-size:26px;color:var(--ink-soft);line-height:1;min-width:1.4em}
+.k-q{font-family:var(--text);font-weight:700;font-size:23px;line-height:1.25;flex:1}
+.k-tag{font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;border-radius:99px;padding:5px 11px;white-space:nowrap}
+.k-tag.asked{background:var(--page-2);color:var(--ink-soft)}
+.k-tag.live{background:var(--hl);color:var(--leather-lo)}
+.k-opts{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px}
+.k-opt{display:grid;grid-template-columns:26px 1fr;gap:10px;align-items:baseline;font-family:var(--text);font-size:17px;line-height:1.3;padding:8px 10px;border-radius:7px;background:rgba(0,0,0,.035)}
+.k-opt b{font-family:var(--display);font-weight:800;color:var(--ink-soft)}
+.k-opt.right{background:var(--hl-green);font-weight:700}
+.k-opt.right b{color:var(--ink)}
+.k-foot{display:flex;flex-wrap:wrap;align-items:baseline;gap:8px;font-size:16px;border-top:1px solid var(--page-2);padding-top:11px}
+.k-foot .lbl{font-weight:800;color:var(--ink-soft);font-size:13px;letter-spacing:.06em;text-transform:uppercase}
+.k-foot .val{font-family:var(--text);font-weight:700;font-size:19px}
+.k-foot .ref{font-family:var(--text);font-style:italic;color:var(--ink-soft);margin-left:auto}
+.k-miss{font-family:var(--text);font-style:italic;color:#B3410F;font-size:17px}
+
+@media print{
+  body{background:#fff}
+  body::before,.k-head .btn,.k-note{display:none!important}
+  .k-shell{max-width:none;padding:0}
+  .k-card{break-inside:avoid;box-shadow:none;border:1px solid #bbb;border-radius:6px;margin-bottom:10px}
+  .brand-name,.k-sub{color:#000}
+  .ribbon{display:none}
+}
+
+@media (max-width:900px){
+  .k-opts{grid-template-columns:1fr}
+}
+@media (prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<script>
+  var KEY = <?!= JSON.stringify(key) ?>;
+</script>
+
+<!-- =========================================================
+     ANSWER KEY — ?admin=KEY&view=key
+     ========================================================= -->
+<div id="keyPage" class="k-shell">
+  <header class="k-head">
+    <div class="brand"><span class="ribbon" aria-hidden="true"></span><span class="brand-name">Zion Quiz</span><span class="k-sub">answer key</span></div>
+    <button class="btn btn-line btn-sm" id="kPrint">Print this</button>
+  </header>
+  <p class="k-note" id="kNote">Reading the sheet…</p>
+  <div class="k-list" id="kList"></div>
+</div>
+
+<script>
+const $ = id => document.getElementById(id);
+
+function call(fn, args) {
+  return new Promise((resolve, reject) => {
+    const r = google.script.run.withSuccessHandler(resolve).withFailureHandler(reject);
+    r[fn].apply(r, args || []);
+  });
+}
+function clean(e) {
+  const m = (e && e.message) ? e.message : String(e);
+  return m.replace(/^(Exception|Error):\s*/, '');
+}
+function el(tag, cls, text) {
+  const n = document.createElement(tag);
+  if (cls) n.className = cls;
+  if (text != null) n.textContent = text;
+  return n;
+}
+
+/* ============================================================
+   ANSWER KEY — every question with its answer marked
+   ============================================================ */
+function initKey() {
+  $('kPrint').onclick = () => window.print();
+  loadKey();
+  setInterval(loadKey, 8000);     // picks up sheet edits and marks what you have asked
+}
+
+async function loadKey() {
+  let d;
+  try { d = await call('getAnswerKey', [KEY]); }
+  catch (e) { $('kNote').textContent = clean(e); return; }
+
+  const qs = d.questions || [];
+  $('kNote').textContent = qs.length
+    ? qs.length + ' questions · ' + d.asked + ' asked so far · the correct answer is marked in green'
+    : 'The Questions sheet is empty.';
+
+  const list = $('kList');
+  list.innerHTML = '';
+
+  qs.forEach((q, i) => {
+    const asked = d.askedIdx.indexOf(i) > -1;
+    const live  = d.liveIdx === i;
+
+    const card = el('div', 'k-card' + (live ? ' live' : asked ? ' asked' : ''));
+
+    const top = el('div', 'k-top');
+    top.appendChild(el('span', 'k-n', String(i + 1)));
+    top.appendChild(el('h2', 'k-q', q.text));
+    if (live || asked) {
+      top.appendChild(el('span', 'k-tag ' + (live ? 'live' : 'asked'), live ? 'On screen now' : 'Asked'));
+    }
+    card.appendChild(top);
+
+    const opts = el('div', 'k-opts');
+    q.opts.forEach((o, j) => {
+      const row = el('div', 'k-opt' + (j === q.answer ? ' right' : ''));
+      row.appendChild(el('b', null, 'ABCD'[j]));
+      row.appendChild(el('span', null, o || '—'));
+      opts.appendChild(row);
+    });
+    card.appendChild(opts);
+
+    const foot = el('div', 'k-foot');
+    if (q.ready) {
+      foot.appendChild(el('span', 'lbl', 'Answer'));
+      foot.appendChild(el('span', 'val', q.opts[q.answer]));
+    } else {
+      foot.appendChild(el('span', 'k-miss', 'Incomplete — needs four options and a 1-4 in column F'));
+    }
+    if (q.ref) foot.appendChild(el('span', 'ref', q.ref));
+    card.appendChild(foot);
+
+    list.appendChild(card);
+  });
+}
+
+initKey();
+</script>
+</body>
+</html>

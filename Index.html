@@ -1,0 +1,1054 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<base target="_top">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,800&family=Newsreader:ital,opsz,wght@0,6..72,500;0,6..72,700;1,6..72,500&display=swap" rel="stylesheet">
+<style>
+/* ============================================================
+   ZION QUIZ
+   A leather-bound Bible: oxblood cover, gilt page edges,
+   thumb-index tabs, and a highlighter for the chosen answer.
+   ============================================================ */
+:root{
+  --leather:#3A0D16;
+  --leather-hi:#5C1A28;
+  --leather-lo:#22060D;
+  --gilt:#E0B04A;
+  --gilt-lo:#A98232;
+  --page:#F4EEE2;
+  --page-2:#E7DFCF;
+  --ink:#23191A;
+  --ink-soft:#5E5250;
+  --hl:#F9E547;
+  --hl-green:#8BE3A0;
+  --fade:#B7AA9E;
+  --display:"Bricolage Grotesque","Arial Narrow",system-ui,sans-serif;
+  --text:"Newsreader",Georgia,"Times New Roman",serif;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+[hidden]{display:none!important}
+html,body{min-height:100%}
+body{
+  font-family:var(--display);color:var(--page);
+  background:radial-gradient(120% 80% at 50% -10%, var(--leather-hi) 0%, var(--leather) 50%, var(--leather-lo) 100%) fixed;
+  -webkit-font-smoothing:antialiased;
+}
+body::before{
+  content:"";position:fixed;inset:0;pointer-events:none;opacity:.22;mix-blend-mode:overlay;
+  background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 0 .55 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+}
+button{font:inherit;color:inherit;background:none;border:none;cursor:pointer}
+button:disabled{cursor:not-allowed}
+:focus-visible{outline:3px solid var(--hl);outline-offset:3px}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+
+/* ---------- brand: a ribbon bookmark hanging from the top edge ---------- */
+.brand{display:flex;align-items:flex-start;gap:12px}
+.ribbon{
+  width:18px;height:40px;margin-top:-22px;flex-shrink:0;
+  background:linear-gradient(90deg,var(--gilt-lo),var(--gilt) 45%,var(--gilt-lo));
+  clip-path:polygon(0 0,100% 0,100% 100%,50% 78%,0 100%);
+}
+.brand-name{font-weight:800;font-size:21px;letter-spacing:-.01em;line-height:1}
+
+/* ---------- buttons ---------- */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:10px;font-weight:800;font-size:18px;padding:17px 26px;border-radius:14px;transition:transform .08s ease,filter .15s ease}
+.btn:not(:disabled):active{transform:scale(.97)}
+.btn:disabled{opacity:.4}
+.btn-gilt{background:linear-gradient(180deg,#F0C660,var(--gilt) 55%,#C8962F);color:var(--leather-lo);box-shadow:0 2px 0 #8C6A22,0 10px 24px rgba(0,0,0,.35)}
+.btn-gilt:not(:disabled):hover{filter:brightness(1.06)}
+.btn-line{border:2px solid rgba(224,176,74,.55);color:var(--page)}
+.btn-line:not(:disabled):hover{border-color:var(--gilt)}
+.btn-sm{font-size:14px;padding:10px 16px;border-radius:10px}
+.btn-block{width:100%}
+
+/* ============================================================
+   PLAYER
+   ============================================================ */
+.p-shell{max-width:540px;margin:0 auto;min-height:100vh;min-height:100dvh;display:flex;flex-direction:column;padding:22px 20px calc(24px + env(safe-area-inset-bottom))}
+.p-top{display:flex;justify-content:space-between;align-items:flex-start;gap:12px}
+.p-who{font-size:14px;font-weight:600;color:var(--page-2);text-align:right;line-height:1.3}
+.p-body{flex:1;display:flex;flex-direction:column;justify-content:center;padding:28px 0 6px}
+.scr{display:none}
+.scr.on{display:flex;flex-direction:column;animation:enter .38s cubic-bezier(.2,.9,.3,1) both}
+@keyframes enter{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+
+.big{font-weight:800;font-size:clamp(46px,13vw,72px);line-height:.95;letter-spacing:-.035em}
+.center{text-align:center}
+.lead{font-family:var(--text);font-size:19px;line-height:1.5;color:var(--page-2);margin-top:14px;max-width:34ch}
+.lead.center{margin-left:auto;margin-right:auto}
+.err{color:var(--hl);font-weight:600;font-size:15px;min-height:22px;margin-top:14px}
+
+.name-in{width:100%;margin:30px 0 22px;padding:18px 20px;border-radius:14px;background:var(--page);color:var(--ink);border:none;font:700 24px/1.2 var(--display);letter-spacing:-.01em;box-shadow:0 12px 30px rgba(0,0,0,.28)}
+.name-in::placeholder{color:var(--fade)}
+.name-in:focus{outline:none;box-shadow:inset 0 0 0 3px var(--gilt),0 12px 30px rgba(0,0,0,.28)}
+
+/* the gold spinner everyone waits on between questions */
+.spin{position:relative;width:148px;height:148px;margin:0 auto 34px}
+.spin::before{content:"";position:absolute;inset:0;border-radius:50%;border:9px solid rgba(224,176,74,.14)}
+.arc{position:absolute;inset:0;border-radius:50%;border:9px solid transparent;border-top-color:var(--gilt);border-right-color:var(--gilt);animation:rot 1.1s cubic-bezier(.55,.15,.45,.85) infinite}
+.arc-2{inset:24px;border-width:5px;border-color:transparent;border-bottom-color:var(--hl);animation-duration:1.6s;animation-direction:reverse}
+.spin.small{width:78px;height:78px;margin:26px auto 0}
+.spin.small::before,.spin.small .arc{border-width:6px}
+.spin.small .arc-2{display:none}
+@keyframes rot{to{transform:rotate(360deg)}}
+.count{margin-top:26px;font-weight:600;font-size:16px;color:var(--gilt)}
+.sound-btn{align-self:center;margin-top:20px}
+
+/* question */
+.q-top{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:14px}
+.q-num{font-weight:800;font-size:18px;color:var(--gilt)}
+.clock{font-weight:800;font-size:30px;font-variant-numeric:tabular-nums;letter-spacing:-.02em}
+.clock.idle{color:rgba(244,238,226,.35)}
+.clock.hot{color:var(--hl)}
+
+.page{position:relative;background:var(--page);color:var(--ink);border-radius:6px 14px 14px 6px;padding:22px 22px 24px;box-shadow:6px 0 0 -2px var(--gilt),10px 0 0 -4px var(--gilt-lo),0 20px 40px rgba(0,0,0,.35)}
+.find{font-family:var(--text);font-style:italic;font-size:17px;color:var(--ink-soft)}
+.qtext{font-family:var(--text);font-weight:700;font-size:clamp(25px,6.4vw,34px);line-height:1.2;letter-spacing:-.01em;margin-top:6px;transition:font-size .35s ease}
+.qtext.small{font-size:clamp(19px,4.7vw,23px);line-height:1.3}
+.read{margin-top:20px}
+.read-track{height:8px;border-radius:99px;background:var(--page-2);overflow:hidden}
+.read-fill{height:100%;width:100%;background:var(--leather);border-radius:99px}
+.read-txt{margin-top:10px;font-size:15px;font-weight:600;color:var(--ink-soft)}
+.read-txt b{font-size:22px;color:var(--leather);font-variant-numeric:tabular-nums}
+
+.hint{font-family:var(--text);font-size:17px;color:var(--page-2);margin:18px 0 10px;min-height:24px}
+.limit{height:10px;border-radius:99px;background:rgba(0,0,0,.28);overflow:hidden;margin-bottom:16px}
+.limit-fill{height:100%;width:100%;background:linear-gradient(90deg,var(--gilt),var(--hl));border-radius:99px}
+.limit-fill.low{background:linear-gradient(90deg,#E8643C,#F9E547)}
+
+/* options = thumb-index tabs cut into the page edge */
+.opts{display:grid;gap:11px}
+.opt{display:grid;grid-template-columns:54px 1fr;align-items:stretch;min-height:66px;background:var(--page);color:var(--ink);border-radius:6px 12px 12px 6px;overflow:hidden;text-align:left;box-shadow:0 8px 20px rgba(0,0,0,.28);animation:tabin .42s cubic-bezier(.2,1.15,.4,1) both;transition:transform .08s ease}
+.opt:active{transform:scale(.985)}
+.opt .tab{display:grid;place-items:center;background:var(--leather-lo);color:var(--gilt);font-weight:800;font-size:22px;border-radius:0 30px 30px 0;margin:8px 0}
+.opt .words{align-self:center;padding:14px 16px 14px 14px;font-family:var(--text);font-weight:500;font-size:clamp(18px,4.8vw,21px);line-height:1.35}
+.opt .words span{background-image:linear-gradient(transparent 14%,var(--hl) 14%,var(--hl) 90%,transparent 90%);background-repeat:no-repeat;background-size:0% 100%;-webkit-box-decoration-break:clone;box-decoration-break:clone;padding:0 2px;transition:background-size .32s cubic-bezier(.5,0,.2,1)}
+.opt.sel .words span{background-size:100% 100%}
+.opt.sel .tab{background:var(--hl);color:var(--leather-lo)}
+.opt.sel{box-shadow:0 0 0 3px var(--hl),0 10px 24px rgba(0,0,0,.35)}
+@keyframes tabin{from{opacity:0;transform:translateX(-26px)}to{opacity:1;transform:none}}
+.submit{margin-top:18px}
+
+/* locked */
+.bigtime{display:flex;align-items:baseline;gap:12px;margin:10px 0 22px}
+.bigtime span{font-weight:800;font-size:clamp(80px,24vw,128px);line-height:.85;letter-spacing:-.05em;font-variant-numeric:tabular-nums}
+.bigtime small{font-size:18px;font-weight:600;color:var(--gilt)}
+.picked-txt{font-family:var(--text);font-size:22px;line-height:1.4;margin-top:6px}
+.picked-txt mark{background:linear-gradient(transparent 14%,var(--hl) 14%,var(--hl) 90%,transparent 90%);color:inherit;padding:0 3px;-webkit-box-decoration-break:clone;box-decoration-break:clone}
+#retryBtn{margin-top:16px;align-self:flex-start}
+.wait-line{font-family:var(--text);font-style:italic;font-size:18px;color:var(--gilt);text-align:center;margin-top:14px}
+
+/* the question-number flash */
+.flash{position:fixed;inset:0;z-index:60;display:flex;flex-direction:column;align-items:center;justify-content:center;background:var(--hl);color:var(--leather-lo);text-align:center;padding:24px}
+.flash-k{font-weight:800;font-size:22px}
+.flash-n{font-weight:800;font-size:clamp(150px,52vw,280px);line-height:.8;letter-spacing:-.06em;animation:slam .5s cubic-bezier(.2,1.4,.4,1) both}
+.flash-s{font-family:var(--text);font-style:italic;font-size:21px;margin-top:14px}
+@keyframes slam{from{opacity:0;transform:scale(1.9)}to{opacity:1;transform:none}}
+
+/* ============================================================
+   HOST CONTROL
+   ============================================================ */
+.c-shell{max-width:1260px;margin:0 auto;padding:28px 28px 48px}
+.c-head{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:16px;padding-bottom:20px;border-bottom:1px solid rgba(224,176,74,.3)}
+.c-role{font-family:var(--text);font-style:italic;font-size:18px;color:var(--gilt);margin-left:4px;align-self:center}
+.c-stats{display:flex;gap:26px;flex-wrap:wrap}
+.stat{display:flex;flex-direction:column;gap:2px}
+.stat b{font-size:26px;font-weight:800;line-height:1;letter-spacing:-.02em}
+.stat span{font-size:13px;color:var(--page-2)}
+.stat.live b{color:var(--hl)}
+.c-links{display:flex;gap:9px;flex-wrap:wrap}
+.c-grid{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,1fr);gap:24px;margin-top:24px;align-items:start}
+.c-col{display:grid;gap:24px}
+.card{background:var(--page);color:var(--ink);border-radius:8px 16px 16px 8px;padding:22px 24px;box-shadow:6px 0 0 -2px var(--gilt),0 18px 36px rgba(0,0,0,.3)}
+.card h2{display:flex;justify-content:space-between;align-items:baseline;gap:12px;font-size:21px;font-weight:800;letter-spacing:-.01em;margin-bottom:14px}
+.card h2 small{font-family:var(--text);font-style:italic;font-weight:500;font-size:15px;color:var(--ink-soft)}
+.c-next{font-family:var(--text);font-size:18px;color:var(--ink-soft);margin-bottom:16px;line-height:1.45}
+.c-next b{font-family:var(--display);color:var(--ink);font-weight:800}
+.actions{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.actions .pop{grid-column:1/-1;font-size:21px;padding:22px}
+.card .btn-line{border-color:var(--page-2);color:var(--ink);border-width:2px}
+.card .btn-line:not(:disabled):hover{border-color:var(--ink)}
+.warn{background:#FFF6C7;border-radius:10px;padding:12px 14px;font-family:var(--text);font-size:16px;color:var(--ink);margin-bottom:14px}
+.card .btn-danger{border:2px solid #D8826B;color:#A33C1E;background:rgba(216,130,107,.08);font-size:15px;padding:12px 18px}
+.card .btn-danger:not(:disabled):hover{background:#A33C1E;border-color:#A33C1E;color:#fff}
+.reset-note{font-family:var(--text);font-style:italic;font-size:15px;color:var(--ink-soft);margin-top:12px;line-height:1.45}
+
+.live-q{font-family:var(--text);font-weight:700;font-size:25px;line-height:1.25}
+.live-opts{display:grid;gap:6px;margin:14px 0 18px}
+.live-opt{display:grid;grid-template-columns:30px 1fr;gap:10px;align-items:baseline;font-family:var(--text);font-size:17px;padding:6px 8px;border-radius:6px}
+.live-opt b{font-family:var(--display);font-weight:800;color:var(--ink-soft)}
+.live-opt.right{background:var(--hl-green)}
+.live-opt.right b{color:var(--ink)}
+.ans{display:grid;grid-template-columns:28px 1fr auto 26px;gap:10px;align-items:center;padding:9px 2px;border-top:1px solid var(--page-2);font-size:16px}
+.ans .r{font-weight:800;color:var(--ink-soft)}
+.ans .n{font-weight:700}
+.ans .t{font-variant-numeric:tabular-nums;font-weight:600}
+.ans .m{font-weight:800;text-align:center}
+.ans.no{color:var(--fade)}
+.empty{font-family:var(--text);font-style:italic;color:var(--ink-soft);font-size:17px;padding:6px 0}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{background:var(--leather);color:var(--page);padding:7px 13px;border-radius:99px;font-weight:600;font-size:14px}
+
+.vlist{max-height:620px;overflow:auto;margin:0 -8px}
+.vrow{display:grid;grid-template-columns:38px 1fr auto;gap:12px;align-items:center;width:100%;text-align:left;padding:11px 8px;border-radius:8px}
+.vrow+.vrow{margin-top:2px}
+.vrow:hover{background:var(--page-2)}
+.vrow .vn{font-weight:800;color:var(--ink-soft);font-variant-numeric:tabular-nums;align-self:start;padding-top:2px}
+.vrow .vq{font-weight:700;font-size:15px;display:block;line-height:1.3}
+.vrow .va{font-family:var(--text);font-size:14px;color:var(--ink-soft);display:block;margin-top:3px}
+.vrow .va.miss{color:#B3410F;font-style:italic}
+.vrow .tag{font-size:12px;font-weight:700;color:var(--ink-soft);border:1.5px solid var(--page-2);border-radius:99px;padding:3px 9px;white-space:nowrap;align-self:start}
+.vrow.used .vq,.vrow.used .va{opacity:.5}
+.vrow.sel{background:var(--leather);color:var(--page)}
+.vrow.sel .vn,.vrow.sel .va{color:var(--page-2)}
+.vrow.sel .tag{border-color:var(--gilt);color:var(--gilt)}
+.c-err{color:var(--hl);font-weight:600;min-height:22px;margin-top:10px}
+
+/* ============================================================
+   LEADERBOARD (projector)
+   ============================================================ */
+.b-shell{max-width:1480px;margin:0 auto;padding:30px 44px 56px}
+.b-head{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:20px}
+.b-head .brand-name{font-size:30px}
+.b-head .ribbon{width:24px;height:56px;margin-top:-30px}
+.b-ctrl{display:flex;align-items:center;gap:12px}
+.b-upd{font-size:14px;color:var(--page-2);min-width:118px;text-align:right}
+.b-auto.on{background:var(--page);color:var(--ink);border-color:var(--page)}
+.b-hero{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:flex-end;gap:30px;padding:36px 0 26px}
+.b-qn{font-weight:800;font-size:22px;color:var(--gilt)}
+.b-q{font-family:var(--text);font-weight:700;font-size:clamp(34px,4.4vw,62px);line-height:1.08;letter-spacing:-.02em;margin-top:8px;max-width:22ch}
+.b-count{text-align:right}
+.b-count b{display:block;font-weight:800;font-size:clamp(56px,6vw,92px);line-height:.9;letter-spacing:-.04em;font-variant-numeric:tabular-nums}
+.b-count span{font-size:18px;color:var(--page-2)}
+.b-answer{display:flex;flex-wrap:wrap;align-items:baseline;gap:18px;background:var(--page);color:var(--ink);border-radius:8px 16px 16px 8px;padding:18px 26px;margin-bottom:22px;box-shadow:6px 0 0 -2px var(--gilt)}
+.b-answer span{font-weight:800;font-size:18px;color:var(--ink-soft)}
+.b-answer p{font-family:var(--text);font-size:clamp(26px,2.6vw,36px);font-weight:600}
+.b-answer p mark{background:linear-gradient(transparent 14%,var(--hl-green) 14%,var(--hl-green) 90%,transparent 90%);color:inherit;padding:0 4px}
+.b-list{display:grid;gap:10px}
+.b-row{display:grid;grid-template-columns:92px 1fr auto 64px;align-items:center;gap:22px;background:var(--page);color:var(--ink);border-radius:6px 16px 16px 6px;overflow:hidden;min-height:78px;box-shadow:0 10px 24px rgba(0,0,0,.28);animation:rowin .45s cubic-bezier(.2,1.1,.4,1) both}
+.b-rank{align-self:stretch;display:grid;place-items:center;background:var(--leather-lo);color:var(--gilt);font-weight:800;font-size:34px;border-radius:0 40px 40px 0;margin:9px 0}
+.b-name{font-weight:800;font-size:clamp(24px,2.3vw,34px);letter-spacing:-.01em;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;padding:14px 0}
+.b-name small{display:block;font-family:var(--text);font-style:italic;font-weight:500;font-size:17px;color:var(--ink-soft);margin-top:2px;letter-spacing:0}
+.b-time{font-weight:800;font-size:clamp(26px,2.5vw,38px);font-variant-numeric:tabular-nums;letter-spacing:-.02em;text-align:right}
+.b-time small{font-size:.5em;font-weight:600;color:var(--ink-soft);margin-left:4px}
+.b-mark{width:44px;height:44px;border-radius:50%;display:grid;place-items:center;font-weight:800;font-size:22px;justify-self:start}
+.b-mark.ok{background:var(--hl-green);color:var(--ink)}
+.b-mark.no{border:2px solid var(--page-2);color:var(--fade)}
+.b-row.first{min-height:118px}
+.b-row.first .b-rank{background:var(--hl);color:var(--leather-lo);font-size:52px}
+.b-row.first .b-name{font-size:clamp(36px,3.6vw,56px)}
+.b-row.first .b-name span{background:linear-gradient(transparent 16%,var(--hl) 16%,var(--hl) 90%,transparent 90%);padding:0 6px}
+.b-row.first .b-time{font-size:clamp(34px,3.3vw,52px)}
+.b-row.wrong{background:var(--page-2);color:var(--ink-soft)}
+.b-row.wrong .b-rank{background:transparent;color:var(--fade)}
+.b-empty{font-family:var(--text);font-style:italic;font-size:26px;color:var(--page-2);padding:50px 0;text-align:center}
+.b-room{display:flex;flex-wrap:wrap;gap:12px}
+.b-room .chip{font-size:22px;padding:10px 20px;background:var(--page);color:var(--ink);animation:rowin .4s ease both}
+@keyframes rowin{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}
+
+
+@media (max-width:900px){
+  .c-grid{grid-template-columns:1fr}
+  .b-shell{padding:24px 18px 40px}
+  .b-row{grid-template-columns:62px 1fr auto 44px;gap:12px}
+  .b-rank{font-size:24px}
+  .b-mark{width:34px;height:34px;font-size:17px}
+}
+@media (prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<script>
+  var MODE = <?!= JSON.stringify(mode) ?>;
+  var KEY  = <?!= JSON.stringify(key) ?>;
+</script>
+<?!= include('Audio') ?>
+
+<!-- =========================================================
+     PLAYER — everyone's phone
+     ========================================================= -->
+<div id="player" class="p-shell" hidden>
+  <header class="p-top">
+    <div class="brand"><span class="ribbon" aria-hidden="true"></span><span class="brand-name">Zion Quiz</span></div>
+    <div class="p-who" id="pWho"></div>
+  </header>
+
+  <main class="p-body">
+    <section class="scr" id="p-name">
+      <h1 class="big">Enter your name</h1>
+      <p class="lead" id="nameNote">This is how you'll appear on the leaderboard.</p>
+      <label class="sr" for="nameIn">Your name</label>
+      <input id="nameIn" class="name-in" maxlength="24" autocomplete="off" autocapitalize="words" placeholder="Your name">
+      <button class="btn btn-gilt btn-block" id="nameBtn">Submit</button>
+      <p class="err" id="nameErr" role="alert"></p>
+    </section>
+
+    <section class="scr" id="p-wait">
+      <div class="spin" aria-hidden="true"><div class="arc"></div><div class="arc arc-2"></div></div>
+      <h1 class="big center" id="waitTitle">You're in</h1>
+      <p class="lead center" id="waitLead">Watch the big screen. The first question comes when the host starts.</p>
+      <p class="count center" id="waitCount" aria-live="polite"></p>
+      <button class="btn btn-line btn-sm sound-btn" id="soundBtn" hidden>Turn on sound</button>
+    </section>
+
+    <section class="scr" id="p-q">
+      <div class="q-top">
+        <span class="q-num" id="qNum">Question 1</span>
+        <span class="clock idle" id="qClock" aria-label="Your time">0.00</span>
+      </div>
+      <article class="page">
+        <p class="find">Question</p>
+        <h2 class="qtext" id="qText"></h2>
+        <div class="read" id="readBox">
+          <div class="read-track"><div class="read-fill" id="readFill"></div></div>
+          <p class="read-txt">Options open in <b id="readNum">5</b></p>
+        </div>
+      </article>
+      <p class="hint" id="qHint"></p>
+      <div class="limit" id="limitBox" hidden><div class="limit-fill" id="limitFill"></div></div>
+      <div class="opts" id="opts" role="radiogroup" aria-label="Answer options"></div>
+      <button class="btn btn-gilt btn-block submit" id="ansBtn" disabled hidden>Submit answer</button>
+    </section>
+
+    <section class="scr" id="p-lock">
+      <p class="q-num" id="lockHead">Answer submitted</p>
+      <p class="bigtime"><span id="lockTime">0.00</span><small>seconds</small></p>
+      <article class="page">
+        <p class="find">Your answer</p>
+        <p class="picked-txt"><mark id="lockPick"></mark></p>
+      </article>
+      <p class="lead" id="lockNote" aria-live="polite"></p>
+      <button class="btn btn-line" id="retryBtn" hidden>Send again</button>
+      <div class="spin small" aria-hidden="true"><div class="arc"></div></div>
+      <p class="wait-line">Waiting for the next question</p>
+    </section>
+
+    <section class="scr" id="p-closed">
+      <h1 class="big center" id="closedTitle">Time's up</h1>
+      <p class="lead center" id="closedLead">Twenty seconds gone. Watch the big screen.</p>
+      <div class="spin small" aria-hidden="true"><div class="arc"></div></div>
+      <p class="wait-line">Waiting for the next question</p>
+    </section>
+  </main>
+
+  <div class="flash" id="flash" hidden aria-live="assertive">
+    <p class="flash-k">Question</p>
+    <p class="flash-n" id="flashN">1</p>
+    <p class="flash-s">Eyes up</p>
+  </div>
+</div>
+
+<!-- =========================================================
+     HOST CONTROL — ?admin=KEY
+     ========================================================= -->
+<div id="control" class="c-shell" hidden>
+  <header class="c-head">
+    <div class="brand"><span class="ribbon" aria-hidden="true"></span><span class="brand-name">Zion Quiz</span><span class="c-role">host controls</span></div>
+    <div class="c-stats">
+      <div class="stat" id="cPhaseBox"><b id="cPhase">…</b><span>Game status</span></div>
+      <div class="stat"><b id="cJoined">0</b><span>Players in</span></div>
+      <div class="stat"><b id="cAsked">0</b><span>Questions asked</span></div>
+    </div>
+    <div class="c-links">
+      <button class="btn btn-line btn-sm" id="cScreen">Open big screen</button>
+      <button class="btn btn-line btn-sm" id="cBoard">Open leaderboard</button>
+      <button class="btn btn-line btn-sm" id="cKey">Answer key</button>
+    </div>
+  </header>
+  <p class="c-err" id="cErr" role="alert"></p>
+
+  <div class="c-grid">
+    <div class="c-col">
+      <section class="card">
+        <h2>Next move</h2>
+        <div id="cWarn"></div>
+        <p class="c-next" id="cNext"></p>
+        <div class="actions">
+          <button class="btn btn-gilt pop" id="cPop">Pop question</button>
+          <button class="btn btn-line" id="cClose">Close answers</button>
+          <button class="btn btn-line" id="cNew">New game</button>
+          <button class="btn btn-danger" id="cReset" style="grid-column:1/-1">Reset everything</button>
+        </div>
+        <p class="reset-note">New game clears the names for a fresh round. Reset everything also wipes every answer out of the sheet — use it between events, never mid‑quiz.</p>
+      </section>
+
+      <section class="card">
+        <h2>Live question <small id="cLiveCount"></small></h2>
+        <div id="cLive"></div>
+      </section>
+
+      <section class="card">
+        <h2>Players <small id="cPlayersCount"></small></h2>
+        <div class="chips" id="cPlayers"></div>
+      </section>
+    </div>
+
+    <div class="c-col">
+      <section class="card">
+        <h2>Questions <small>Tap one to choose what pops next</small></h2>
+        <div class="vlist" id="cQuestions"></div>
+      </section>
+    </div>
+  </div>
+</div>
+
+<!-- =========================================================
+     LEADERBOARD — ?admin=KEY&view=board
+     ========================================================= -->
+<div id="board" class="b-shell" hidden>
+  <header class="b-head">
+    <div class="brand"><span class="ribbon" aria-hidden="true"></span><span class="brand-name">Zion Quiz</span></div>
+    <div class="b-ctrl">
+      <span class="b-upd" id="bUpd"></span>
+      <button class="btn btn-line btn-sm b-auto" id="bAuto" aria-pressed="false">Auto refresh off</button>
+      <button class="btn btn-gilt" id="bRefresh">Refresh</button>
+    </div>
+  </header>
+  <section class="b-hero" id="bHero"></section>
+  <div class="b-answer" id="bAnswer" hidden></div>
+  <div class="b-list" id="bList"></div>
+</div>
+
+<script>
+/* ============================================================
+   SHARED HELPERS
+   ============================================================ */
+const $ = id => document.getElementById(id);
+
+function call(fn, args) {
+  return new Promise((resolve, reject) => {
+    const r = google.script.run.withSuccessHandler(resolve).withFailureHandler(reject);
+    r[fn].apply(r, args || []);
+  });
+}
+function clean(e) {
+  const m = (e && e.message) ? e.message : String(e);
+  return m.replace(/^(Exception|Error):\s*/, '');
+}
+function el(tag, cls, text) {
+  const n = document.createElement(tag);
+  if (cls) n.className = cls;
+  if (text != null) n.textContent = text;
+  return n;
+}
+function secs(ms) { return (ms / 1000).toFixed(2); }
+function clockNow() {
+  return new Date().toLocaleTimeString([], { hour: 'numeric', minute: '2-digit', second: '2-digit' });
+}
+
+const mem = {};
+const store = {
+  get(k) {
+    try { const v = localStorage.getItem(k); if (v != null) return JSON.parse(v); } catch (e) {}
+    return mem[k] || null;
+  },
+  set(k, v) {
+    mem[k] = v;
+    try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {}
+  }
+};
+
+/* ============================================================
+   SOUND — both clips are built into the page
+   ============================================================ */
+let aRead = null, aTick = null, soundOn = false;
+
+function primeSound() {
+  try {
+    if (!aRead) { aRead = new Audio(SND_READ); aRead.preload = 'auto'; }
+    if (!aTick) { aTick = new Audio(SND_TICK); aTick.loop = true; aTick.preload = 'auto'; }
+    // play-then-pause inside a tap is what unlocks audio on iPhones
+    [aRead, aTick].forEach(a => {
+      a.volume = 0;
+      const p = a.play();
+      const settle = () => { try { a.pause(); a.currentTime = 0; a.volume = 1; } catch (e) {} };
+      if (p && p.then) p.then(settle).catch(() => { a.volume = 1; });
+      else settle();
+    });
+    soundOn = true;
+    $('soundBtn').hidden = true;
+  } catch (e) { soundOn = false; }
+}
+function playRead() {
+  try { if (aRead) { aRead.currentTime = 0; aRead.volume = 1; const p = aRead.play(); if (p && p.catch) p.catch(() => {}); } } catch (e) {}
+}
+function stopRead() { try { if (aRead) { aRead.pause(); aRead.currentTime = 0; } } catch (e) {} }
+function startTick() {
+  try { if (aTick) { aTick.currentTime = 0; aTick.volume = 1; const p = aTick.play(); if (p && p.catch) p.catch(() => {}); } } catch (e) {}
+}
+function stopTick() { try { if (aTick) { aTick.pause(); aTick.currentTime = 0; } } catch (e) {} }
+function stopAllSound() { stopRead(); stopTick(); }
+
+/* ============================================================
+   PLAYER
+   ============================================================ */
+let me = {};
+let cur = null;
+let pollTimer = null, polling = false;
+let raf = null, flashTimer = null;
+let READ_MS = 5000, ANSWER_MS = 20000, FLASH = 600;
+
+function pShow(id) {
+  document.querySelectorAll('#player .scr').forEach(s => s.classList.toggle('on', s.id === id));
+}
+function pOn(id) { return $(id).classList.contains('on'); }
+
+function initPlayer() {
+  $('player').hidden = false;
+  me = store.get('zq_me') || {};
+  if (me.name) {
+    $('nameIn').value = me.name;
+    $('waitTitle').textContent = "You're in, " + me.name;
+  }
+  paintWho();
+
+  $('nameBtn').onclick = join;
+  $('nameIn').addEventListener('keydown', e => { if (e.key === 'Enter') join(); });
+  $('ansBtn').onclick = () => submitPick('sent');
+  $('soundBtn').onclick = primeSound;
+
+  if (me.pid) { pShow('p-wait'); $('soundBtn').hidden = false; }
+  else pShow('p-name');
+  poll();
+}
+
+function paintWho() { $('pWho').textContent = (me.pid && me.name) ? me.name : ''; }
+
+async function join() {
+  primeSound();                                  // this tap is what unlocks the sound
+  const name = $('nameIn').value.trim();
+  if (!name) { $('nameErr').textContent = 'Type your name first.'; return; }
+
+  const btn = $('nameBtn');
+  btn.disabled = true; btn.textContent = 'Joining…';
+  $('nameErr').textContent = '';
+  try {
+    const r = await call('joinGame', [name, me.pid || '']);
+    me = { pid: r.pid, name: r.name, gameId: r.gameId };
+    store.set('zq_me', me);
+    paintWho();
+    $('waitTitle').textContent = "You're in, " + r.name;
+    pShow('p-wait');
+    poll();
+  } catch (e) {
+    $('nameErr').textContent = clean(e);
+  } finally {
+    btn.disabled = false; btn.textContent = 'Submit';
+  }
+}
+
+function schedule(ms) { clearTimeout(pollTimer); pollTimer = setTimeout(poll, ms); }
+
+async function poll() {
+  if (polling) return;
+  polling = true;
+  try { handle(await call('getState', [me.pid || ''])); }
+  catch (e) { /* the next poll tries again */ }
+  polling = false;
+  schedule(2000);
+}
+
+function handle(s) {
+  READ_MS = s.readMs || READ_MS;
+  ANSWER_MS = s.answerMs || ANSWER_MS;
+  FLASH = s.flashMs || FLASH;
+  $('waitCount').textContent = s.joined === 1 ? '1 person has joined' : s.joined + ' people have joined';
+
+  // not part of this game (or the host started a new one)
+  if (!me.pid || me.gameId !== s.gameId || !s.known) {
+    if (!pOn('p-name')) {
+      leaveQuestion();
+      cur = null;
+      if (me.gameId && me.gameId !== s.gameId) {
+        $('nameNote').textContent = 'A new game has started. Submit your name to join it.';
+      }
+      if (me.gameId !== s.gameId) me.pid = '';
+      paintWho();
+      pShow('p-name');
+    }
+    return;
+  }
+
+  if (s.phase === 'lobby') {
+    if (!pOn('p-wait')) {
+      leaveQuestion();
+      cur = null;
+      $('waitLead').textContent = 'Watch the big screen. The first question comes when the host starts.';
+      pShow('p-wait');
+    }
+    return;
+  }
+
+  if (s.phase === 'question') {
+    if (!cur || cur.seq !== s.seq) startQuestion(s);
+    return;
+  }
+
+  if (s.phase === 'closed') {
+    if (cur && cur.seq === s.seq && (cur.stage === 'locked' || cur.stage === 'missed')) return;
+    leaveQuestion();
+    const done = store.get(ansKey(s.seq));
+    cur = { seq: s.seq, q: s.q, stage: done ? 'locked' : 'missed' };
+    if (done) showLocked(done.ms, done.text, 'Answer submitted', 'Answers are closed. Watch the big screen.');
+    else showMissed("Time's up", 'Answers are closed. Watch the big screen for the answer.');
+  }
+}
+
+function timesKey(seq) { return 'zq_q_' + me.gameId + '_' + seq; }
+function ansKey(seq)   { return 'zq_a_' + me.gameId + '_' + seq; }
+
+/** When this phone first saw the question. Saved, so a reload never restarts the clock. */
+function questionTimes(seq) {
+  let t = store.get(timesKey(seq));
+  if (!t) { t = { start: Date.now() }; store.set(timesKey(seq), t); }
+  const openAt = t.start + FLASH + READ_MS;
+  return { start: t.start, openAt: openAt, deadline: openAt + ANSWER_MS };
+}
+
+function startQuestion(s) {
+  leaveQuestion();
+  const t = questionTimes(s.seq);
+  cur = { seq: s.seq, q: s.q, start: t.start, openAt: t.openAt, deadline: t.deadline,
+          stage: 'flash', sel: null, open: false };
+
+  const done = store.get(ansKey(s.seq));
+  if (done || s.answered) {
+    cur.stage = 'locked';
+    showLocked(done ? done.ms : null, done ? done.text : '', 'Answer submitted',
+               'You have already answered this one.');
+    return;
+  }
+  if (Date.now() >= t.deadline) {           // arrived (or reloaded) after the 20 seconds
+    cur.stage = 'missed';
+    showMissed("Time's up", 'The twenty seconds for this question are gone.');
+    return;
+  }
+
+  const now = Date.now();
+  const flashEnd = t.start + FLASH;
+  if (now < flashEnd) {
+    $('flashN').textContent = s.q.n;
+    $('flash').hidden = false;
+    if (now - t.start < 400) playRead();      // music starts with the flash
+    const seq = s.seq;
+    flashTimer = setTimeout(() => {
+      $('flash').hidden = true;
+      if (cur && cur.seq === seq && cur.stage === 'flash') runQuestion();
+    }, flashEnd - now);
+  } else {
+    if (now < t.openAt) playRead();
+    runQuestion();
+  }
+}
+
+function runQuestion() {
+  const q = cur.q;
+  cur.stage = 'read';
+  $('qNum').textContent = 'Question ' + q.n;
+  $('qText').textContent = q.text;
+  $('qText').classList.remove('small');
+  $('readBox').hidden = false;
+  $('limitBox').hidden = true;
+  $('qHint').textContent = 'Read it carefully. The options come next.';
+  $('qClock').textContent = '0.00';
+  $('qClock').className = 'clock idle';
+  $('opts').innerHTML = '';
+  $('ansBtn').hidden = true;
+  $('ansBtn').disabled = true;
+  pShow('p-q');
+
+  const tick = () => {
+    if (!cur || (cur.stage !== 'read' && cur.stage !== 'answer')) return;
+    const now = Date.now();
+
+    if (now < cur.openAt) {
+      const left = cur.openAt - now;
+      $('readFill').style.width = Math.max(0, left / READ_MS * 100) + '%';
+      $('readNum').textContent = Math.ceil(left / 1000);
+    } else {
+      if (!cur.open) openOptions();
+      const used = now - cur.openAt;
+      const left = cur.deadline - now;
+      $('qClock').textContent = secs(Math.min(used, ANSWER_MS));
+      $('limitFill').style.width = Math.max(0, left / ANSWER_MS * 100) + '%';
+      $('limitFill').classList.toggle('low', left < 6000);
+      if (left <= 0) { timeUp(); return; }
+    }
+    raf = requestAnimationFrame(tick);
+  };
+  tick();
+}
+
+function openOptions() {
+  cur.open = true;
+  cur.stage = 'answer';
+  $('readBox').hidden = true;
+  $('limitBox').hidden = false;
+  $('qText').classList.add('small');
+  $('qClock').className = 'clock';
+  $('qHint').textContent = 'Tap your answer. Twenty seconds.';
+  stopRead();
+  startTick();
+
+  const box = $('opts');
+  box.innerHTML = '';
+  ['A', 'B', 'C', 'D'].slice(0, cur.q.opts.length).forEach((letter, i) => {
+    const b = el('button', 'opt');
+    b.setAttribute('role', 'radio');
+    b.setAttribute('aria-checked', 'false');
+    b.style.animationDelay = (i * 0.07) + 's';
+    b.appendChild(el('span', 'tab', letter));
+    const w = el('span', 'words');
+    w.appendChild(el('span', null, cur.q.opts[i]));
+    b.appendChild(w);
+    b.onclick = () => pick(i);
+    box.appendChild(b);
+  });
+  $('ansBtn').hidden = false;
+}
+
+function pick(i) {
+  if (!cur || cur.stage !== 'answer') return;
+  cur.sel = i;
+  stopTick();                                  // the ticking stops the moment they choose
+  $('qClock').classList.add('hot');
+  document.querySelectorAll('#opts .opt').forEach((b, j) => {
+    b.classList.toggle('sel', j === i);
+    b.setAttribute('aria-checked', j === i ? 'true' : 'false');
+  });
+  $('ansBtn').disabled = false;
+  $('qHint').textContent = 'Now press Submit answer to lock your time.';
+}
+
+/** Sends the chosen option. reason 'sent' is a tap, 'auto' is the 20 seconds running out. */
+function submitPick(reason) {
+  if (!cur || cur.stage !== 'answer' || cur.sel === null) return;
+  const ms = Math.min(ANSWER_MS, Math.max(0, Date.now() - cur.openAt));
+  const text = cur.q.opts[cur.sel];
+  cur.stage = 'locked';
+  cancelAnimationFrame(raf);
+  stopAllSound();
+
+  store.set(ansKey(cur.seq), { ms: ms, text: text });
+  showLocked(ms, text, reason === 'auto' ? 'Time ran out, answer sent' : 'Answer submitted', 'Sending your answer…');
+  send(cur.seq, cur.sel, ms);
+}
+
+function timeUp() {
+  if (!cur) return;
+  if (cur.sel !== null) { submitPick('auto'); return; }   // they chose but never pressed Submit
+  cur.stage = 'missed';
+  cancelAnimationFrame(raf);
+  stopAllSound();
+  showMissed("Time's up", 'No answer went in for this question.');
+}
+
+function send(seq, choice, ms) {
+  $('retryBtn').hidden = true;
+  $('lockNote').textContent = 'Sending your answer…';
+  call('submitAnswer', [me.pid, seq, choice, ms]).then(r => {
+    if (!cur || cur.seq !== seq) return;
+    if (r.ok) $('lockNote').textContent = 'Received. Your time is on the leaderboard.';
+    else if (r.reason === 'closed') $('lockNote').textContent = 'The host had already closed this question, so this answer was not counted.';
+    else $('lockNote').textContent = 'This phone is not in the current game. Wait for the name screen and join again.';
+  }).catch(() => {
+    if (!cur || cur.seq !== seq) return;
+    $('lockNote').textContent = 'Your answer did not reach the game. Your time is kept, so send it again.';
+    $('retryBtn').hidden = false;
+    $('retryBtn').onclick = () => send(seq, choice, ms);
+  });
+}
+
+function showLocked(ms, text, head, note) {
+  $('lockHead').textContent = head;
+  $('lockTime').textContent = ms == null ? '—' : secs(ms);
+  $('lockPick').textContent = text || 'Already recorded';
+  $('lockNote').textContent = note;
+  $('retryBtn').hidden = true;
+  pShow('p-lock');
+}
+
+function showMissed(title, note) {
+  $('closedTitle').textContent = title;
+  $('closedLead').textContent = note;
+  pShow('p-closed');
+}
+
+function leaveQuestion() {
+  cancelAnimationFrame(raf);
+  clearTimeout(flashTimer);
+  stopAllSound();
+  $('flash').hidden = true;
+}
+
+/* ============================================================
+   HOST CONTROL
+   ============================================================ */
+const C = { st: null, sel: null, manual: false, busy: false };
+const PHASE = { lobby: 'Lobby open', question: 'Question live', closed: 'Answers closed' };
+
+function initControl() {
+  $('control').hidden = false;
+  $('cPop').onclick   = () => act('adminPop', [C.sel], $('cPop'));
+  $('cClose').onclick = () => act('adminClose', [], $('cClose'));
+  $('cNew').onclick   = () => {
+    if (confirm('Start a new game? Everyone will need to enter their name again.')) act('adminNewGame', [], $('cNew'));
+  };
+  $('cReset').onclick = () => {
+    if (!confirm('Reset everything?\n\nThis clears every name and every answer out of the sheet and starts a fresh game. It cannot be undone.')) return;
+    if (!confirm('Last check \u2014 all past results will be gone for good. Reset?')) return;
+    act('adminResetAll', [], $('cReset'));
+  };
+  $('cScreen').onclick = () => openTab(C.st && C.st.screenUrl);
+  $('cBoard').onclick  = () => openTab(C.st && C.st.boardUrl);
+  $('cKey').onclick    = () => openTab(C.st && C.st.keyUrl);
+  controlLoop();
+}
+
+function openTab(url) {
+  if (url) window.open(url, '_blank');
+  else $('cErr').textContent = 'Deploy the web app first, then these buttons work.';
+}
+
+async function controlLoop() {
+  if (!C.busy) {
+    try { render(await call('adminStatus', [KEY])); $('cErr').textContent = ''; }
+    catch (e) { $('cErr').textContent = clean(e); }
+  }
+  setTimeout(controlLoop, 2500);
+}
+
+async function act(fn, args, btn) {
+  if (C.busy) return;
+  C.busy = true;
+  const label = btn.textContent;
+  btn.disabled = true; btn.textContent = 'Working…';
+  try {
+    const st = await call(fn, [KEY].concat(args || []));
+    C.manual = false;
+    render(st);
+    $('cErr').textContent = '';
+  } catch (e) {
+    $('cErr').textContent = clean(e);
+  } finally {
+    C.busy = false;
+    btn.textContent = label;
+    if (C.st) render(C.st);
+  }
+}
+
+function render(st) {
+  C.st = st;
+  if (!C.manual) C.sel = st.next < st.questions.length ? st.next : null;
+
+  $('cPhase').textContent = PHASE[st.phase] || st.phase;
+  $('cPhaseBox').classList.toggle('live', st.phase === 'question');
+  $('cJoined').textContent = st.players.length;
+  $('cAsked').textContent = st.asked + ' of ' + st.questions.length;
+
+  const missing = st.questions.filter(q => !q.ready).length;
+  const warn = $('cWarn');
+  warn.innerHTML = '';
+  if (missing) {
+    warn.appendChild(el('p', 'warn', missing + (missing === 1 ? ' question is' : ' questions are') +
+      ' incomplete in the sheet — each needs all four options and a 1, 2, 3 or 4 in column F. ' +
+      'Those cannot be popped.'));
+  }
+
+  const chosen = C.sel !== null ? st.questions[C.sel] : null;
+  const next = $('cNext');
+  next.innerHTML = '';
+  if (chosen && chosen.ready) {
+    next.append(st.asked === 0 ? 'Starts the game with ' : 'Sends ');
+    next.appendChild(el('b', null, 'question ' + (C.sel + 1)));
+    next.append(' to every phone and the big screen: the number flashes, the music plays while it shows for ' +
+                st.readSeconds + ' seconds, then the options open with ' + st.answerSeconds + ' seconds on the clock.');
+  } else if (chosen) {
+    next.append('Question ' + (C.sel + 1) + ' is incomplete in the sheet. Fill in its four options and the correct number, then it becomes poppable.');
+  } else {
+    next.textContent = 'Every question has been used. Tap one in the list to send it again.';
+  }
+  $('cPop').textContent = st.asked === 0 ? 'Start game' : 'Pop next question';
+  $('cPop').disabled = C.busy || !chosen || !chosen.ready;
+  $('cClose').disabled = C.busy || st.phase !== 'question';
+  $('cNew').disabled = C.busy;
+  $('cReset').disabled = C.busy;
+
+  // live question
+  const live = $('cLive');
+  live.innerHTML = '';
+  if (!st.q) {
+    $('cLiveCount').textContent = '';
+    live.appendChild(el('p', 'empty', 'Nothing live yet. Every phone is on the waiting spinner.'));
+  } else {
+    $('cLiveCount').textContent = st.answers.length + ' of ' + st.players.length + ' answered';
+    live.appendChild(el('p', 'live-q', st.q.text));
+    const list = el('div', 'live-opts');
+    st.q.opts.forEach((o, i) => {
+      const row = el('div', 'live-opt' + (i === st.q.answer ? ' right' : ''));
+      row.appendChild(el('b', null, 'ABCD'[i]));
+      row.appendChild(el('span', null, o));
+      list.appendChild(row);
+    });
+    live.appendChild(list);
+
+    if (!st.answers.length) {
+      live.appendChild(el('p', 'empty', 'No answers yet.'));
+    } else {
+      let rank = 0;
+      st.answers.forEach(a => {
+        const row = el('div', 'ans' + (a.correct ? '' : ' no'));
+        row.appendChild(el('span', 'r', a.correct ? String(++rank) : ''));
+        row.appendChild(el('span', 'n', a.name));
+        row.appendChild(el('span', 't', secs(a.ms) + ' s'));
+        row.appendChild(el('span', 'm', a.correct ? '✓' : '✗'));
+        live.appendChild(row);
+      });
+    }
+  }
+
+  // players
+  $('cPlayersCount').textContent = st.players.length ? st.players.length + ' joined' : '';
+  const chips = $('cPlayers');
+  chips.innerHTML = '';
+  if (!st.players.length) chips.appendChild(el('p', 'empty', 'Waiting for names. Share the player link.'));
+  st.players.forEach(n => chips.appendChild(el('span', 'chip', n)));
+
+  // question picker
+  const vl = $('cQuestions');
+  const scroll = vl.scrollTop;
+  vl.innerHTML = '';
+  st.questions.forEach((q, i) => {
+    const used = st.askedIdx.indexOf(i) > -1;
+    const row = el('button', 'vrow' + (used ? ' used' : '') + (i === C.sel ? ' sel' : ''));
+    row.appendChild(el('span', 'vn', String(i + 1)));
+    const txt = el('span');
+    txt.appendChild(el('span', 'vq', q.text));
+    txt.appendChild(el('span', 'va' + (q.ready ? '' : ' miss'),
+      q.ready ? 'Answer: ' + q.answerText : 'Needs four options and a 1-4'));
+    row.appendChild(txt);
+    const tag = i === C.sel ? 'Next' : used ? 'Asked' : '';
+    const tagEl = el('span', 'tag', tag);
+    tagEl.hidden = !tag;
+    row.appendChild(tagEl);
+    row.onclick = () => { C.sel = i; C.manual = true; render(C.st); };
+    vl.appendChild(row);
+  });
+  vl.scrollTop = scroll;
+}
+
+/* ============================================================
+   LEADERBOARD — this question only
+   ============================================================ */
+const B = { data: null, auto: false, timer: null, busy: false };
+
+function initBoard() {
+  $('board').hidden = false;
+  $('bRefresh').onclick = refreshBoard;
+  $('bAuto').onclick = () => {
+    B.auto = !B.auto;
+    $('bAuto').classList.toggle('on', B.auto);
+    $('bAuto').setAttribute('aria-pressed', String(B.auto));
+    $('bAuto').textContent = B.auto ? 'Auto refresh on' : 'Auto refresh off';
+    clearInterval(B.timer);
+    if (B.auto) B.timer = setInterval(refreshBoard, 4000);
+  };
+  refreshBoard();
+}
+
+async function refreshBoard() {
+  if (B.busy) return;
+  B.busy = true;
+  $('bRefresh').disabled = true;
+  $('bRefresh').textContent = 'Refreshing…';
+  try {
+    B.data = await call('getBoard', [KEY]);
+    paintBoard();
+    $('bUpd').textContent = 'Updated ' + clockNow();
+  } catch (e) {
+    $('bUpd').textContent = clean(e);
+  }
+  B.busy = false;
+  $('bRefresh').disabled = false;
+  $('bRefresh').textContent = 'Refresh';
+}
+
+function paintBoard() {
+  const d = B.data;
+  if (!d) return;
+  const hero = $('bHero'), list = $('bList'), ans = $('bAnswer');
+  hero.innerHTML = ''; list.innerHTML = ''; ans.hidden = true;
+
+  if (!d.q) {
+    const left = el('div');
+    left.appendChild(el('p', 'b-qn', 'Waiting for the host'));
+    left.appendChild(el('h1', 'b-q', 'Players in the room'));
+    hero.appendChild(left);
+    const right = el('div', 'b-count');
+    right.appendChild(el('b', null, String(d.joined)));
+    right.appendChild(el('span', null, 'joined'));
+    hero.appendChild(right);
+
+    const room = el('div', 'b-room');
+    if (!d.players.length) list.appendChild(el('p', 'b-empty', 'Names appear here as people join.'));
+    d.players.forEach((n, i) => {
+      const c = el('span', 'chip', n);
+      c.style.animationDelay = (i * 0.03) + 's';
+      room.appendChild(c);
+    });
+    list.appendChild(room);
+    return;
+  }
+
+  const left = el('div');
+  left.appendChild(el('p', 'b-qn', 'Question ' + d.q.n));
+  left.appendChild(el('h1', 'b-q', d.q.text));
+  hero.appendChild(left);
+  const right = el('div', 'b-count');
+  right.appendChild(el('b', null, d.current.length + '/' + d.joined));
+  right.appendChild(el('span', null, 'answered'));
+  hero.appendChild(right);
+
+  if (d.q.answerText) {
+    ans.hidden = false;
+    ans.innerHTML = '';
+    ans.appendChild(el('span', null, 'Correct answer'));
+    const p = el('p');
+    p.appendChild(el('mark', null, d.q.answerText));
+    ans.appendChild(p);
+  }
+
+  if (!d.current.length) { list.appendChild(el('p', 'b-empty', 'No answers yet. Press Refresh once phones start submitting.')); return; }
+
+  let rank = 0;
+  d.current.forEach((a, i) => {
+    const first = a.correct && rank === 0;
+    const row = el('div', 'b-row' + (first ? ' first' : '') + (a.correct ? '' : ' wrong'));
+    row.style.animationDelay = (i * 0.05) + 's';
+    row.appendChild(el('div', 'b-rank', a.correct ? String(++rank) : '–'));
+    const nm = el('div', 'b-name');
+    nm.appendChild(el('span', null, a.name));
+    if (first) nm.appendChild(el('small', null, 'Fastest finger'));
+    row.appendChild(nm);
+    const t = el('div', 'b-time', secs(a.ms));
+    t.appendChild(el('small', null, 's'));
+    row.appendChild(t);
+    row.appendChild(el('div', 'b-mark ' + (a.correct ? 'ok' : 'no'), a.correct ? '✓' : '✗'));
+    list.appendChild(row);
+  });
+}
+
+/* ============================================================
+   START
+   ============================================================ */
+if (MODE === 'control') initControl();
+else if (MODE === 'board') initBoard();
+else initPlayer();
+</script>
+</body>
+</html>
